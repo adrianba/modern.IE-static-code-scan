@@ -28,15 +28,6 @@ var url = require('url'),
     scanner = require('./scanner.js');
 
 /**
- * Responds with a bad request error
- * */
-function sendBadRequest(res){
-    res.writeHeader(400, {"Content-Type": "text/plain"});
-    res.write('Your package is malformed' + '\n');
-    res.end();
-}
-
-/**
  * Returns the local scan page
  * */
 function returnMainPage(response) {
@@ -78,62 +69,12 @@ function handleRequest(req, response) {
         response.end();
     },function(err) {
         // Return err details
-        response.writeHead(200, {"Content-Type": "application/json"});
+        response.writeHead(err.pageError ? 200 : 500, {"Content-Type": "application/json"});
         response.write(JSON.stringify(err));
         response.end();
     })
 }
 
-/**
- * Handles the content of a package sent via any of the plugins
- * */
-/*function handlePackage(req, res) {
-    if (!req.body.js || !req.body.css || !req.body.html || !req.body.url) {
-        remoteErrorResponse(res, 400, "Missing information");
-    }
-    var start = Date.now(),
-        cssPromises = [],
-        website;
-
-    //TODO: try/catch this
-    try {
-        website = {
-            url: req.body.url ? url.parse(req.body.url.replace(/"/g, '')) : "http://privates.ite",
-            content: req.body.html,
-            css: null,
-            js: JSON.parse(req.body.js),
-            $: cheerio.load(req.body.html, { lowerCaseTags: true, lowerCaseAttributeNames: true })
-        };
-    } catch (e) {
-        sendBadRequest(res);
-        return;
-    }
-    
-    var remoteCSS = JSON.parse(req.body.css);
-    remoteCSS.forEach(function (parsedCSS) {
-        if (parsedCSS.content !== '') {
-            cssPromises.push(cssLoader.parseCSS(parsedCSS.content, parsedCSS.url, null, null, website));
-        }
-    });
-
-    promised.all(cssPromises)
-        .then(function (results) {
-            var cssResults = [],
-                promisesTests = [];
-
-            cssResults.concat.apply(cssResults, results);
-            website.css = cssResults;
-
-            for (var i = 0; i < tests.length; i++) {
-                // Call each test and save its returned promise
-                promisesTests.push(tests[i].check(website));
-            }
-
-            promises.all(promisesTests)
-                .then(sendResults.bind(null, res, start));
-        });
-}
-*/
 // ## CORS middleware
 //
 // see: http://stackoverflow.com/questions/7067966/how-to-allow-cors-in-express-nodejs
@@ -154,7 +95,6 @@ app.use(allowCrossDomain);
 
 app.use(express.bodyParser());
 app.get('/', handleRequest);
-//app.post('/package', handlePackage);
 app.listen(port);
 
 console.log('Server started on port ' + port);
