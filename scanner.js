@@ -194,7 +194,7 @@ exports.analyze = function(urlToAnalyze,user,password) {
     var deferred = new Deferred(),auth;
 
     // If we have a user/pass, send it along. Wait for 401 response before sending passwords.
-    if (user !== "undefined" && password !== "undefined") {
+    if (user !== undefined && password !== undefined) {
         auth = {
             'user': user,
             'pass': password,
